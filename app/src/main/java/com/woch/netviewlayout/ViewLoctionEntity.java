@@ -23,6 +23,16 @@ public class ViewLoctionEntity {
     private String W;
     private String H;
 
+    public String getIntentName() {
+        return IntentName;
+    }
+
+    public void setIntentName(String intentName) {
+        IntentName = intentName;
+    }
+
+    private String IntentName;
+
 
     public String getX() {
         return X;

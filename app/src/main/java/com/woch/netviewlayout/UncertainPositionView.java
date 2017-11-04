@@ -2,6 +2,7 @@ package com.woch.netviewlayout;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -19,6 +20,8 @@ public class UncertainPositionView extends ViewGroup {
 
     private List<ViewLoctionEntity> viewLoctionEntityList;
     private int width, height;
+
+    private int MaxWidth = 0;
 
     public UncertainPositionView(Context context) {
         this(context, null, 0);
@@ -43,18 +46,85 @@ public class UncertainPositionView extends ViewGroup {
 
         this.viewLoctionEntityList = viewLoctionEntityList;
 
-        removeAllViews();
+        if (MaxWidth == 0){
+            addView(new View(getContext()));
+        }else {
+            removeAllViews();
 
-        for (ViewLoctionEntity v : viewLoctionEntityList) {
+            for (final ViewLoctionEntity vLE : viewLoctionEntityList) {
 
-            ImageView iv = new ImageView(getContext());
-            iv.setBackgroundColor(Color.parseColor("#b36d61"));
-            LayoutParams lp = new LayoutParams((int) ScreenUtils.dp2px(Float.parseFloat(v.getW()), getContext()), (int) ScreenUtils.dp2px(Float.parseFloat(v.getH()), getContext()));
-            iv.setLayoutParams(lp);
-            //iv.setId();
-            addView(iv);
+                ImageView iv = new ImageView(getContext());
+                iv.setBackgroundColor(Color.parseColor("#b36d61"));
+                LayoutParams lp = new LayoutParams((int) ScreenUtils.dp2px(Float.parseFloat(vLE.getW()), getContext()), (int) ScreenUtils.dp2px(Float.parseFloat(vLE.getH()), getContext()));
+                iv.setLayoutParams(lp);
+                iv.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        //if (vLE.getIntentName() != null && !"".equals(vLE.getIntentName())){
+
+                            Class send = null;
+                            try {
+                                //send = Class.forName(vLE.getIntentName());
+                                send = Class.forName("com.woch.netviewlayout.ShowActivity");
+                            } catch (ClassNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                            Intent intent = new Intent();
+                            intent.setClass(getContext(), send);
+                            getContext().startActivity(intent);
+
+                        //}
+
+                    }
+                });
+                //iv.setId();
+                addView(iv);
+
+            }
+
+            width = MaxWidth;
+            height = MaxWidth/3*2;
 
         }
+
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        if (MaxWidth == 0){
+
+            MaxWidth = getMaxWidth(widthMeasureSpec);
+            setList(viewLoctionEntityList);
+
+        }
+
+        setMeasuredDimension(MaxWidth, MaxWidth/3*2);
+
+    }
+
+    private int getMaxWidth(int widthMeasureSpec) {
+
+        int result = 0;
+        int specMode = MeasureSpec.getMode(widthMeasureSpec);
+        int specSize = MeasureSpec.getSize(widthMeasureSpec);
+
+        if (specMode == MeasureSpec.EXACTLY) {
+            // We were told how big to be
+            result = specSize;
+        } else {
+            // Measure the text
+            // result = (int) mTextPaint.measureText(mText) + getPaddingLeft()
+            // + getPaddingRight();
+            if (specMode == MeasureSpec.AT_MOST) {
+                // Respect AT_MOST value if that was what is called for by
+                // measureSpec
+                result = Math.min(result, specSize);
+            }
+        }
+        return result;
 
     }
 
